@@ -35,23 +35,39 @@ module.exports = function(thorin, opt) {
     res += '\n';
     // check aliases
     if(action.aliases) {
-      res += '##### Aliases \n';
+      res += '\n##### Aliases \n';
       action.aliases.forEach((alias) => {
         res += ' - ' + alias.verb + ' ' + alias.name + '\n';
       });
     }
 
     if(inputs.length > 0) {
-      res += '##### Input \n';
+      res += '\n##### Input \n';
       inputs.forEach((inputData) => {
         Object.keys(inputData).forEach((inputName) => {
-          let type = capitalize(inputData[inputName].type);
-          res += ' - **' + inputName + '** = `' + type + '`\n';
+          let input = inputData[inputName],
+            type = capitalize(inputData[inputName].type),
+            defaultError = input.error(),
+            defaultValue = input.default();
+          res += ' - **' + inputName + '**';
+          if(defaultError) {
+            res += ' *(required)*';
+          }
+          res += '  `' + type;
+          if(type === 'enum') {
+            let vals = input.options();
+            res += '(' + vals.join(', ') + ')';
+          }
+          if(defaultValue) {
+            res += ', default ' + defaultValue;
+          }
+          res += '`';
+          res += '\n';
         });
       });
     }
     if(authoriaztions.length > 0) {
-      res += '##### Authorization \n';
+      res += '\n##### Authorization \n';
       authoriaztions.forEach((auth) => {
         res += ' - ' + auth + '\n';
       });
