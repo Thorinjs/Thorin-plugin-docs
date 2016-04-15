@@ -1,0 +1,18 @@
+{
+  "name": "thorin-plugin-docs",
+  "author": "Stiudeo",
+  "version": "1.0.1",
+  "dependencies": {
+  },
+  "description": "Thorin.js doc builder for actions",
+  "main": "index.js",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Stiudeo/Thorin-plugin-docs"
+  },
+  "homepage": "http://thorinjs.com",
+  "bugs": {
+    "url": "https://github.com/Stiudeo/Thorin-plugin-docs/issues"
+  }
+}
