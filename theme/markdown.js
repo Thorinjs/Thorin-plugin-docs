@@ -37,14 +37,17 @@ module.exports = function(thorin, opt) {
     if(action.aliases) {
       res += '\n##### Aliases \n';
       action.aliases.forEach((alias) => {
-        res += ' - ' + alias.verb + ' ' + alias.name + '\n';
+        res += '> - ' + alias.verb + ' ' + alias.name + '\n';
       });
     }
 
     if(inputs.length > 0) {
+      let inputMap = {};
       res += '\n##### Input \n';
       inputs.forEach((inputData) => {
         Object.keys(inputData).forEach((inputName) => {
+          if(inputMap[inputName]) return;
+          inputMap[inputName] = true;
           let input = inputData[inputName],
             type = capitalize(inputData[inputName].type),
             defaultError = input.error(),

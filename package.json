@@ -1,7 +1,7 @@
 {
   "name": "thorin-plugin-docs",
   "author": "Stiudeo",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "dependencies": {
   },
   "description": "Thorin.js doc builder for actions",
