@@ -43,6 +43,12 @@ module.exports = function(thorin, opt, pluginName) {
   }
   const writerObj = writerInit(thorin, opt, themeFn);
   docObj.writer = writerObj;
-  thorin.dispatcher.on('action', (action) => writerObj.document(action));
+  // collect all items till thorin is running
+  let actionList = [];
+  thorin.dispatcher.on('action', (action) => actionList.push(action));
+  thorin.on(thorin.EVENT.RUN, () => {
+    actionList = actionList.sort((a, b) => a.name.localeCompare(b.name));
+    actionList.map((item) => writerObj.document(item));
+  });
   return docObj;
 };
