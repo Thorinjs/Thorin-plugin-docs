@@ -52,3 +52,4 @@ module.exports = function(thorin, opt, pluginName) {
   });
   return docObj;
 };
+module.exports.publicName = 'docs';
