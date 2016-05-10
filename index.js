@@ -11,6 +11,7 @@ const path = require('path'),
  */
 module.exports = function(thorin, opt, pluginName) {
   opt = thorin.util.extend({
+    logger: pluginName || 'docs',
     path: 'docs/actions.md', // the default path of the output file
     theme: 'markdown'       // we currently only support markdown
   }, opt);
