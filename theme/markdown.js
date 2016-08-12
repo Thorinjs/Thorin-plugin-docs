@@ -87,7 +87,7 @@ module.exports = function(thorin, opt) {
               type: capitalize(input.type)
             };
           }
-          if(!defaultValue) {
+          if(typeof defaultValue === 'undefined') {
             inputMap[keyName].required = true;
             inputMap[keyName].error = defaultError;
             inputMap[keyName].data = input;
@@ -107,7 +107,8 @@ module.exports = function(thorin, opt) {
           let vals = item.data.options();
           res += '(' + vals.join(', ') + ')';
         }
-        if(item.value) {
+        if(typeof item.value !== 'undefined') {
+          if(item.value == null) item.value = 'null';
           res += ', default ' + (typeof item.value === 'object' ? JSON.stringify(item.value) : item.value);
         }
         res += '`';
