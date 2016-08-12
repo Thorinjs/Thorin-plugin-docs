@@ -11,19 +11,50 @@ function capitalize(str) {
 module.exports = function(thorin, opt) {
   const logger = thorin.logger(opt.logger);
 
-  return function writeMarkdown(action) {
-    // check inputs & authorizations.
-    let inputs = [],
-      authoriaztions = [];
-    for(let i=0; i < action.stack.length; i++) {
-      let item = action.stack[i];
-      if(item.type === 'validate') {
-        inputs.push(item.value);
-      }
-      if(item.type === 'authorize') {
-        authoriaztions.push(item.name);
+  function collectData(result, stack) {
+    if(typeof stack !== 'object' || !stack) return;
+    for(let i=0; i < stack.length; i++ ){
+      let item = stack[i];
+      switch(item.type) {
+        case 'validate':
+          result.input.push(item.value);
+          break;
+        case 'authorize':
+          result.authorization.push(item.name);
+          let auth = thorin.dispatcher.getAuthorization(item.name);
+          if(auth) {
+            collectData(result, auth.stack);
+            let validators = auth.validate;
+            for(let j=0; j < validators.length; j++) {
+              let validator = validators[j];
+              result.input.push(validator);
+            }
+          }
+          break;
+        case 'middleware':
+          result.middleware.push(item.name);
+          let mid = thorin.dispatcher.getMiddleware(item.name);
+          if(mid) {
+            collectData(result, mid.stack);
+            let validators = mid.validate;
+            for(let j=0; j < validators.length; j++) {
+              let validator = validators[j];
+              result.input.push(validator);
+            }
+          }
+          break;
       }
     }
+  }
+
+  return function writeMarkdown(action) {
+    // check inputs & authorizations.
+    let result = {
+      input: [],
+      authorization: [],
+      middleware: []
+    };
+    collectData(result, action.stack);
     let res = '## ' + action.name;
     // check if it has any renders
     for(let i=0; i < action.stack.length; i++) {
@@ -32,51 +63,72 @@ module.exports = function(thorin, opt) {
         break;
       }
     }
-    res += '\n';
     // check aliases
-    if(action.aliases) {
+    if(action.aliases && action.aliases.length > 0) {
       res += '\n##### Aliases \n';
       action.aliases.forEach((alias) => {
         res += '> - ' + alias.verb + ' ' + alias.name + '\n';
       });
     }
-
-    if(inputs.length > 0) {
-      let inputMap = {};
+    if(result.input.length > 0) {
+      let inputMap = {},
+        curated = [];
       res += '\n##### Input \n';
-      inputs.forEach((inputData) => {
-        Object.keys(inputData).forEach((inputName) => {
-          if(inputMap[inputName]) return;
-          inputMap[inputName] = true;
-          let input = inputData[inputName],
-            type = capitalize(inputData[inputName].type),
+      /* We now create the input map. */
+      for(let i=0; i < result.input.length; i++) {
+        Object.keys(result.input[i]).forEach((keyName) => {
+          let input = result.input[i][keyName],
             defaultError = input.error(),
             defaultValue = input.default();
-          res += ' - **' + inputName + '**';
-          if(defaultError) {
-            res += ' *(required)*';
+          if(typeof inputMap[keyName] === 'undefined') {
+            inputMap[keyName] = {
+              data: input,
+              name: keyName,
+              type: capitalize(input.type)
+            };
           }
-          res += '  `' + type;
-          if(type === 'enum') {
-            let vals = input.options();
-            res += '(' + vals.join(', ') + ')';
+          if(!defaultValue) {
+            inputMap[keyName].required = true;
+            inputMap[keyName].error = defaultError;
+            inputMap[keyName].data = input;
+          } else {
+            inputMap[keyName].value = defaultValue;
           }
-          if(defaultValue) {
-            res += ', default ' + defaultValue;
-          }
-          res += '`';
-          res += '\n';
         });
+      }
+      Object.keys(inputMap).forEach((inputName) =>{
+        let item = inputMap[inputName];
+        res += ' - **' + inputName + '**';
+        if(item.required) {
+          res += ' *(required)*';
+        }
+        res += '  `' + item.type;
+        if(item.type === 'enum') {
+          let vals = item.data.options();
+          res += '(' + vals.join(', ') + ')';
+        }
+        if(item.value) {
+          res += ', default ' + (typeof item.value === 'object' ? JSON.stringify(item.value) : item.value);
+        }
+        res += '`';
+        res += '\n';
       });
     }
-    if(authoriaztions.length > 0) {
+    if(result.authorization.length > 0) {
       res += '\n##### Authorization \n';
-      authoriaztions.forEach((auth) => {
+      result.authorization.forEach((auth) => {
         res += ' - ' + auth + '\n';
+      });
+      res += '\n';
+    }
+    if(result.middleware.length > 0) {
+      res += '\n##### Middleware \n';
+      result.middleware.forEach((name) => {
+        res += ' - ' + name + '\n';
       });
       res += '\n';
     }
 
     return res;
   }
-}
+};
