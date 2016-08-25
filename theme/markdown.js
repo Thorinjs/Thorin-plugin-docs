@@ -86,6 +86,8 @@ module.exports = function(thorin, opt) {
               name: keyName,
               type: capitalize(input.type)
             };
+          } else if(inputMap[keyName].type === 'enum') {
+            return; // already set enum values.
           }
           if(typeof defaultValue === 'undefined') {
             inputMap[keyName].required = true;
@@ -103,9 +105,11 @@ module.exports = function(thorin, opt) {
           res += ' *(required)*';
         }
         res += '  `' + item.type;
-        if(item.type === 'enum') {
+        if(item.type === 'enum' && item.data) {
           let vals = item.data.options();
-          res += '(' + vals.join(', ') + ')';
+          if(vals) {
+            res += '(' + vals.join(', ') + ')';
+          }
         }
         if(typeof item.value !== 'undefined') {
           if(item.value == null) item.value = 'null';
