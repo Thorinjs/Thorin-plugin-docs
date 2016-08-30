@@ -1,7 +1,7 @@
 {
   "name": "thorin-plugin-docs",
   "author": "UNLOQ Systems",
-  "version": "1.0.12",
+  "version": "1.0.15",
   "dependencies": {
   },
   "description": "Thorin.js doc builder for actions",

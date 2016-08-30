@@ -4,9 +4,7 @@
  * This will write to the .md file.
  */
 function capitalize(str) {
-  str = str.toLowerCase();
-  str[0] = str.charAt(0).toUpperCase();
-  return str;
+  return str.charAt(0).toUpperCase() + str.substr(1).toLowerCase();
 }
 module.exports = function(thorin, opt) {
   const logger = thorin.logger(opt.logger);
