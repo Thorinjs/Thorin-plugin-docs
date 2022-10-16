@@ -9,6 +9,8 @@ function capitalize(str) {
 module.exports = function(thorin, opt) {
   const logger = thorin.logger(opt.logger);
 
+  let content = '';
+
   function collectData(result, stack) {
     if(typeof stack !== 'object' || !stack) return;
     for(let i=0; i < stack.length; i++ ){
@@ -62,7 +64,7 @@ module.exports = function(thorin, opt) {
       }
     }
     // check aliases
-    if(action.aliases && action.aliases.length > 0) {
+    if (action.aliases && action.aliases.length > 0) {
       res += '\n##### Aliases \n';
       action.aliases.forEach((alias) => {
         res += '> - ' + alias.verb + ' ' + alias.name + '\n';
@@ -132,6 +134,6 @@ module.exports = function(thorin, opt) {
       res += '\n';
     }
 
-    return res;
-  }
+    return (content += res);
+  };
 };
